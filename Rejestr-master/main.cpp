@@ -27,7 +27,7 @@ void createRecord(car *record, int size) {
         printf("Przebieg:");
         scanf("%d", &mileAgeOfUser);
         if (i<size-1) {
-            printf("Chcesz dodac kolejny samochod? 1/0");
+            printf("Chcesz dodac kolejny samochod? TAK (1) / NIE (0)");
             scanf("%d", &con);
         }
 
@@ -48,14 +48,6 @@ void displayRecord(car *record, int size) {
     }
 }
 int saveToFile(car *record, int size) {
-    //pozostalosc po zapisem wieloplikowym
-    // time_t now = time(0);
-    // tm localTime = *localtime(&now);
-    // char dateAndTime[24];
-    // char fileName[16] = "../saved/Saved_";
-    // strftime(dateAndTime, sizeof(dateAndTime), "%Y-%m-%d_%H-%M-%S", &localTime);
-    // strcat(dateAndTime, ".txt");
-    // strcat(fileName, dateAndTime);
     FILE * fptr;
     fptr = NULL;
     fptr = fopen("../saved/saved.txt", "w");
@@ -66,14 +58,14 @@ int saveToFile(car *record, int size) {
         printf("Zapisano do ../saved/saved.txt\n");
     }
     for(int i=0;i<size;i++){
-        fprintf(fptr,"\"%s\",\n%d,\n\"%s\",\n%d,\n", record[i].brand, record[i].prodYear, record[i].plateNumber, record[i].mileAge);
-
+        //fprintf(fptr,"\"%s\",\n%d,\n\"%s\",\n%d,\n", record[i].brand, record[i].prodYear, record[i].plateNumber, record[i].mileAge);
+        fprintf(fptr,"%s,\n%d,\n%s,\n%d;\n", record[i].brand, record[i].prodYear, record[i].plateNumber, record[i].mileAge);
     }
     fclose(fptr);
     return 0;
 }
-/* do zapetlenia
-void loadFromFile(car *record, int size) {
+
+int loadFromFile(car *record, int size) {
     FILE * fptr;
     fptr = NULL;
     fptr = fopen("../saved/saved.txt", "r");
@@ -85,67 +77,105 @@ void loadFromFile(car *record, int size) {
     }
     char buffer[256];
     int linia = 0;
+    int selectedData = 1;
+    int pasteDataToIndex = 0;
     char tempbrand[25] = "";
-    char prodYearOfUsertemp[4] = "";
-    char plateNumberOfUsertemp[7] = "";
-    int mileAgeOftemp;
+    char prodYearOfUsertemp[25] = "";
+    char plateNumberOfUsertemp[25] = "";
+    char mileAgetemp[25] = "";
     int changeLetter = 0;
     while (fgets(buffer, sizeof(buffer), fptr)) {
         linia++;
-        //printf("%d. %s", linia, buffer);
-        switch(linia) {
+        //printf("%d. %s \n", linia, buffer);
+
+        switch(selectedData) {
             case 1:
-                printf("%s test\n", buffer);
+                //printf("%s", buffer);
                 while (buffer[changeLetter] != ',') {
                     //printf("Znak: %c\n", buffer[changeLetter]);
                     tempbrand[changeLetter] = buffer[changeLetter];
                     changeLetter++;
                 }
                 changeLetter = 0;
+                //printf("%d \n", selectedData);
+                selectedData ++;
                 break;
             case 2:
+                //printf("%s", buffer);
                 while (buffer[changeLetter] != ',') {
                     //printf("Znak: %c\n", buffer[changeLetter]);
                     prodYearOfUsertemp[changeLetter] = buffer[changeLetter];
                     changeLetter++;
                 }
                 changeLetter = 0;
+                //printf("%d \n", selectedData);
+                selectedData ++;
                 break;
             case 3:
-                printf("%s test3\n", buffer);
+                //printf("%s", buffer);
+                while (buffer[changeLetter] != ',') {
+                    //printf("Znak: %c\n", buffer[changeLetter]);
+                    plateNumberOfUsertemp[changeLetter] = buffer[changeLetter];
+                    changeLetter++;
+                }
+                changeLetter = 0;
+                //printf("%d \n", selectedData);
+                selectedData ++;
                 break;
             case 4:
-                printf("%s test4\n", buffer);
+                //printf("%s", buffer);
+                while (buffer[changeLetter] != ';') {
+                    //printf("Znak: %c\n", buffer[changeLetter]);
+                    mileAgetemp[changeLetter] = buffer[changeLetter];
+                    changeLetter++;
+                }
+                changeLetter = 0;
+                //printf("%d \n", selectedData);
+                selectedData ++;
                 break;
             default:
                 //printf("Niedozwolona operacja\n");
+                printf("%d \n", selectedData);
                 break;
-
+        }
+        if (selectedData > 4) {
+            strcpy(record[pasteDataToIndex].brand, tempbrand);
+            record[pasteDataToIndex].prodYear = atoi(prodYearOfUsertemp);
+            strcpy(record[pasteDataToIndex].plateNumber, plateNumberOfUsertemp);
+            record[pasteDataToIndex].mileAge = atoi(mileAgetemp);
+            memset(tempbrand, 0, sizeof(tempbrand));
+            memset(prodYearOfUsertemp, 0, sizeof(prodYearOfUsertemp));
+            memset(plateNumberOfUsertemp, 0, sizeof(plateNumberOfUsertemp));
+            memset(mileAgetemp, 0, sizeof(mileAgetemp));
+            selectedData = 1;
+            pasteDataToIndex++;
         }
     }
-    printf("%s sukces\n", tempbrand);
-    printf("%s sukces\n", prodYearOfUsertemp);
+    //printf("%s, %s, %s, %s;\n", tempbrand, prodYearOfUsertemp, plateNumberOfUsertemp, mileAgetemp);
+
 
     fclose(fptr);
-
+    return 0;
 }
-*/
+void createBlankRecord(car *record, int size) {
+    for (int i = 0; i < size; ++i) {
+        strcpy(record[i].brand, "");
+        record[i].prodYear = 0;
+        strcpy(record[i].plateNumber, "");
+        record[i].mileAge = 0;
+    }
+}
+
 
 int main() {
     const int size = 20;
-    //record[19] = {"Mazda", 2019, "KR 1234X", 78000};
     car record[size];
-    for (int i = 0; i < size; ++i) {
-         strcpy(record[i].brand, "");
-         record[i].prodYear = 0;
-         strcpy(record[i].plateNumber, "");
-         record[i].mileAge = 0;
-    }
+    createBlankRecord(record, size);
 
     int mainMenu;
     do {
         printf("Rejestr samochodow\n");
-        printf("1. Stworz rejestr\n");
+        printf("1. Stworz/Nadpisz rejestr\n");
         printf("2. Wczytaj rejestr\n");
         printf("3. Zapisz rejestr\n");
         printf("4. Wyswietl rejestr\n");
@@ -157,10 +187,24 @@ int main() {
                 break;
             case 1:
                 printf("Tworzenie rejestru\n");
-                createRecord(record, size);
+                int decision;
+                if (strlen(record[0].brand) > 0) {
+                    printf("Czy chcesz wyczyscic rejestr? Jesli nie to nadpiszesz obecny rejestr. TAK (1) / NIE (0)");
+                    scanf("%d", &decision);
+                    if (decision == 1) {
+                        createBlankRecord(record, size);
+                        createRecord(record, size);
+                    }else {
+                        createRecord(record, size);
+                    }
+                } else {
+                    createRecord(record, size);
+                }
+                //createRecord(record, size);
                 break;
             case 2:
                 printf("Wczytanie rejestru\n");
+                loadFromFile(record, size);
                 break;
             case 3:
                 printf("Zapisywanie rejestru\n");
